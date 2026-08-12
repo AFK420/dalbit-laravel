@@ -36,5 +36,16 @@
                 {{ number_format((float) $product->price, 2) }} {{ $product->currency }}
             </span>
         </div>
+
+        <div class="mt-4 pt-4 border-t" style="border-color: var(--color-border);">
+            <form action="{{ route('cart.add') }}" method="POST" class="flex gap-2">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                <input type="number" name="quantity" value="1" min="1" max="100" class="w-16 border rounded-md px-2 text-center" style="border-color: var(--color-border); color: var(--color-text);">
+                <button type="submit" class="flex-1 py-1.5 px-3 text-sm font-medium rounded-md transition-opacity hover:opacity-90" style="background-color: var(--color-accent-dark); color: var(--color-bg);">
+                    {{ $locale === 'ar' ? 'أضف للسلة' : 'Add to Cart' }}
+                </button>
+            </form>
+        </div>
     </div>
 </article>

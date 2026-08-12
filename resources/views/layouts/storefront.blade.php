@@ -40,14 +40,24 @@
                 <a href="{{ route('storefront.index') }}" class="text-xl font-semibold" style="color: var(--color-text-inverse);">
                     {{ config('app.name', 'DALBIT') }}
                 </a>
-                <form action="{{ route('locale.toggle') }}" method="POST" class="m-0">
-                    @csrf
-                    <button type="submit"
-                            class="text-sm font-medium hover:underline bg-transparent border-0 p-0 cursor-pointer"
-                            style="color: var(--color-accent-dark);">
-                        {{ ($locale ?? app()->getLocale()) === 'ar' ? 'EN' : 'عربي' }}
-                    </button>
-                </form>
+                <div class="flex items-center gap-6">
+                    <a href="{{ route('cart.index') }}" class="relative text-sm font-medium hover:underline" style="color: var(--color-text-inverse);">
+                        {{ ($locale ?? app()->getLocale()) === 'ar' ? 'السلة' : 'Cart' }}
+                        @if(count(session('cart', [])) > 0)
+                            <span class="absolute -top-2 -right-3 flex items-center justify-center w-4 h-4 text-xs rounded-full font-bold" style="background-color: var(--color-accent-dark); color: var(--color-bg);">
+                                {{ collect(session('cart'))->sum() }}
+                            </span>
+                        @endif
+                    </a>
+                    <form action="{{ route('locale.toggle') }}" method="POST" class="m-0">
+                        @csrf
+                        <button type="submit"
+                                class="text-sm font-medium hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                                style="color: var(--color-accent-dark);">
+                            {{ ($locale ?? app()->getLocale()) === 'ar' ? 'EN' : 'عربي' }}
+                        </button>
+                    </form>
+                </div>
             </div>
         </header>
 
