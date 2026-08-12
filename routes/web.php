@@ -6,6 +6,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QrScanController;
 use Illuminate\Support\Facades\Route;
 
 // Public storefront — the product catalog is the homepage.
@@ -31,6 +32,10 @@ Route::post('/feedback/{order}', [FeedbackController::class, 'store'])
     ->name('feedback.store');
 Route::get('/feedback/thanks', [FeedbackController::class, 'thanks'])
     ->name('feedback.thanks');
+
+// Hidden QR redirect route
+Route::get('/links', [QrScanController::class, 'redirect'])
+    ->name('qr.redirect');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

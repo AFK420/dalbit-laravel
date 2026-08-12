@@ -39,4 +39,8 @@ return [
         'review_url' => env('GOOGLE_MAPS_REVIEW_URL'),
     ],
 
+    'qr' => [
+        'box_url' => env('QR_BOX_REDIRECT_URL'),
+    ],
+
 ];
