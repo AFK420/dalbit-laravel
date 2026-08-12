@@ -1,58 +1,67 @@
-# DALBIT Laravel Migration: Handover to Claude
+# DALBIT Laravel Migration: Master Handover Document
 
-Hello Claude! This document outlines exactly what has happened so far in migrating the **DALBIT Artisan Bites & Moonlight** application from its original Next.js + Supabase architecture to **Laravel (PHP) + MySQL**.
+Hello Claude! You are picking up a conversation in a new chat because the previous one ran out of context tokens. 
 
-You are stepping into a project that is in the **middle of its migration phase**.
-
-## 1. What Has Been Completed So Far
-
-### The Audit & Backup
-- **Next.js Backup**: The entire original Next.js codebase was audited and then fully backed up to `d:\backup-nextjs-original-2026-08-12` locally, and also completely pushed to the original `AFK420/Dalbit` GitHub repository.
-- **Business Logic Reconciliation**: We analyzed the new Ground Truth Business Logic against the old Next.js code. The new logic heavily overrules the old logic in specific ways (detailed below).
-
-### Database Schema Generation
-We have generated the exact MySQL migration files and Eloquent models for the new database structure, strictly following the provided schema. These files are located in `database/migrations/` and `app/Models/`.
-
-1. **`admins` & `admin_login_logs`**: Designed for multi-admin support. Replaces the old single-password system. Tracks exactly who logged in and when.
-2. **`products`**: Normalized into its own table (it used to be a JSON blob in site_settings). It has bilingual fields (`name_ar`, `full_description_ar`), and JSON fields for `flavor_profile`, `allergens`, and `highlights` (extracted directly from the original `config/products.ts`).
-3. **`orders`**: 
-   - **Status**: Uses a PHP-backed Enum (`app/Enums/OrderStatus.php`) with the values: `pending_confirmation`, `new`, `in_progress`, `completed`, `cancelled`. *Note that `pending_confirmation` is a new starting state where an admin must manually verify the order via a phone call.*
-   - **Delivery Scheduling**: Removed the old immediate ordering. Enforces a strict 24-hour advance notice, assigning one of four fixed slots (`day`, `noon`, `afternoon`, `night`).
-   - **Fraud Prevention**: Added `ip_address` to support rate limiting.
-   - **Attribution**: Added `handled_by_admin_id` to track which admin took the order on the Kanban board.
-4. **`qr_scans`**: Tracks silent, hidden mobile QR scans from delivery boxes.
-5. **`customer_feedback`**: A new table for the review funnel. Constrained to 1-5 stars. Stores private text complaints linked to `order_id`.
-6. **`site_settings`**: Global toggles like `show_marquee`. 
-
-### The New GitHub Repository
-- A brand new repository, `dalbit-laravel`, was initialized in `d:\laravel-app`.
-- We committed and pushed the drafted Migrations, Models, Enum, and a highly detailed `README.md` to GitHub.
+This document summarizes **everything** that has been accomplished from the very beginning of the project up to this exact moment. You are jumping in right as we are about to start **Prompt 4** of the migration playbook.
 
 ---
 
-## 2. What HAS NOT Been Done Yet (The Blocker)
-
-**CRITICAL NOTE**: The actual Laravel framework has **not** been scaffolded yet! 
-
-When we attempted to run `composer create-project laravel/laravel`, we discovered that **PHP, Composer, and MySQL are not installed on the user's host machine.** 
-
-As a result, the `d:\laravel-app` directory currently *only* contains the files we manually wrote (`app/`, `database/`, `README.md`, `CLAUDE.md`). The core Laravel framework is missing, and the migrations have never been executed against a real local database.
+## 1. Project Context & Architecture
+We are migrating the **DALBIT Artisan Bites & Moonlight** web app from Next.js + Supabase to a traditional server-side stack.
+- **Tech Stack:** Laravel 13 (PHP 8.3), MySQL 8.4, Blade Templates, Alpine.js, and Tailwind CSS.
+- **No Inertia:** We are strictly using Blade + Alpine to ensure 100% server-side HTML rendering for SEO purposes.
+- **Real-Time Sync:** Because Hostinger Cloud Hosting kills persistent processes (meaning Laravel Reverb won't work reliably), we are using **Pusher** for WebSockets.
 
 ---
 
-## 3. Ground Truth Rules for Next Steps
+## 2. What Has Been Completed (Prompts 1, 2, and 3)
 
-When the environment is ready (PHP/Composer installed), here are the strict rules for continuing the build:
+We have successfully scaffolded the environment, generated the database schema, and mathematically proven that the database constraints and auth guards work.
 
-1. **Tech Stack**: Laravel 12 (PHP 8.3), MySQL, Blade, Alpine.js, Tailwind CSS. Do NOT use Inertia (for SEO and server-side rendering reasons).
-2. **No Real-Time Reverb**: Because Hostinger Cloud Hosting kills persistent background processes, you **must use Pusher** for real-time WebSocket syncing (not Laravel Reverb).
-   - Order creation broadcasts on a **Private** Pusher channel.
-   - Site settings broadcast on a **Public** Pusher channel.
-3. **Image Storage**: Use the local `public` disk (`php artisan storage:link`). Do not use S3.
-4. **Theme Toggling**: The Arabic/English language toggle must also swap the brand color CSS variables simultaneously (Off-white/Lavender/Yellow <-> Deep Lavender/Off-white/Yellow).
-5. **Fraud/Spam Prevention Implementation**: You will need to build the honeypot fields, IP/Phone rate limiters, and the Jordanian phone Regex validation (`07 7/8/9`).
-6. **Telegram Integration**: The Telegram bot order alerts must be carried over exactly as they worked in Next.js.
-7. **Proceed Feature by Feature**: Do not build the whole app at once. The user has a specific playbook ("Prompt 4") that asks to migrate one feature at a time, starting with the Product Catalog, then the Language swap, then the Checkout flow, etc. Verify each step.
-8. **Pre-Deployment Review**: Before deploying, there is a checklist ("Prompt 5") to ensure security (no raw SQL, admin routes protected, Pusher config production-ready, no secrets exposed).
+### ✅ Framework & Packages Scaffolded
+- Ran `composer create-project laravel/laravel` (It pulled Laravel 13.25.0).
+- Required `laravel/breeze` and `pusher/pusher-php-server`.
+- Ran `php artisan breeze:install blade` to set up the authentication scaffolding.
+- Ran `php artisan storage:link` to prepare local image storage.
 
-Good luck, Claude! The database is meticulously planned, but the actual Laravel application needs to be built around it!
+### ✅ Configuration Updates
+- **Timezone:** `config/app.php` is strictly set to `'timezone' => 'Asia/Amman'`. All delivery math must use this.
+- **Environment:** `.env` is configured for MySQL. It also has `BROADCAST_CONNECTION=pusher` and contains empty placeholders for Pusher and Telegram API keys.
+- **Authentication Wiring:** We are using an `Admin` model, not `User`. 
+  - The `config/auth.php` file was carefully modified to use `App\Models\Admin::class` for the `web` guard and the `admins` provider.
+  - The `Admin` model correctly extends `Illuminate\Foundation\Auth\User as Authenticatable`.
+  - We ran a manual test script that successfully created an Admin and passed `Auth::attempt()`.
+
+### ✅ Database Schema & Migrations
+The database schema was meticulously designed and tested against MySQL. We removed the default Laravel `users` table and split the `sessions` / `password_reset_tokens` migrations properly.
+
+The following tables exist and have been migrated successfully:
+1. **`admins`**: Uses `CHAR(36)` UUIDs.
+2. **`admin_login_logs`**: Tracks IP and login times.
+3. **`products`**: Contains bilingual fields (`name_ar`, `full_description_ar`) and JSON arrays (`flavor_profile`, `allergens`, `highlights`).
+4. **`orders`**: 
+   - `status` uses a PHP Enum (not a MySQL ENUM) for flexibility.
+   - Requires a strict 24-hour advance notice.
+   - `delivery_slot` is enforced by a MySQL `CHECK` constraint restricting it to exactly four values: `'day'`, `'noon'`, `'afternoon'`, `'night'`. *(We mathematically proved this constraint works by trying to insert an invalid slot).*
+5. **`qr_scans`**: Hidden analytics for box QR scans.
+6. **`customer_feedback`**: Ratings are enforced by a `CHECK` constraint (1-5). *(We proved this works by trying to insert a 6).*
+7. **`site_settings`**: Global toggles (e.g., marquee visibility).
+
+---
+
+## 3. What Needs to Happen Now (Your Job)
+
+The environment is 100% ready. You are now starting **Prompt 4** of the playbook, which requires migrating the actual application features **one by one**, validating each before moving on.
+
+**The Feature Implementation Order:**
+1. **Product Catalog:** Fetching from the MySQL database and rendering the Blade storefront.
+2. **Language/Theme Swap:** Toggling Arabic/English (RTL/LTR) must also automatically swap the CSS brand color variables (Off-white/Lavender vs Deep Lavender/Off-white).
+3. **Checkout Flow:** Enforcing the 24-hour scheduling math, the spam prevention (honeypots, Jordanian phone regex `07 7/8/9`, IP rate limits), and Telegram bot notifications. *(Note: All orders start as `pending_confirmation` and require manual admin phone verification).*
+4. **Feedback Funnel:** 1-3 stars goes to a private DB complaint; 4-5 stars redirects to Google Maps.
+5. **QR Tracking:** A hidden `/links` page that silently logs a scan before redirecting.
+6. **Admin Auth & Kanban:** The multi-admin dashboard.
+7. **Order Attribution:** Tracking which admin moves a Kanban card.
+8. **Pusher Integration:** Wiring the Kanban board to listen to the Private channel for new orders, and the Storefront to listen to the Public channel for `site_settings` changes.
+9. **WhatsApp Button:** A "Request Feedback" button that formats a `wa.me` link.
+
+Please begin with **Feature 1: The Product Catalog**. Write the necessary Controllers and Blade views!
