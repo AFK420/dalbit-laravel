@@ -37,14 +37,28 @@ Route::get('/feedback/thanks', [FeedbackController::class, 'thanks'])
 Route::get('/links', [QrScanController::class, 'redirect'])
     ->name('qr.redirect');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [AdminAuthController::class, 'create'])
+            ->name('login');
+
+        Route::post('/login', [AdminAuthController::class, 'store'])
+            ->name('login.store');
+    });
+
+    Route::middleware('admin')->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::patch('/orders/{order}/status', [
+            AdminDashboardController::class,
+            'updateStatus',
+        ])->name('orders.status');
+
+        Route::post('/logout', [AdminAuthController::class, 'destroy'])
+            ->name('logout');
+    });
 });
-
-require __DIR__.'/auth.php';

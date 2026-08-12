@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\BridgeLocaleCookie::class,
         ]);
+
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\EnsureAdminAuthenticated::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
