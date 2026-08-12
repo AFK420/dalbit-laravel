@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Public storefront — the product catalog is the homepage.
+Route::get('/', [ProductController::class, 'index'])->name('storefront.index');
+
+Route::post('/locale/toggle', [LocaleController::class, 'toggle'])->name('locale.toggle');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

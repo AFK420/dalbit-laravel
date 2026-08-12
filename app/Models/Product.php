@@ -40,4 +40,67 @@ class Product extends Model
         'allergens_ar' => 'array',
         'highlights' => 'array',
     ];
+
+    /**
+     * Locale-aware field helpers. Each falls back to the English field
+     * if the Arabic column is empty, so a product missing a translation
+     * never renders blank on the AR storefront.
+     */
+    public function localizedName(?string $locale = null): string
+    {
+        $locale ??= app()->getLocale();
+
+        return $locale === 'ar' && filled($this->name_ar)
+            ? $this->name_ar
+            : $this->name;
+    }
+
+    public function localizedCategory(?string $locale = null): string
+    {
+        $locale ??= app()->getLocale();
+
+        return $locale === 'ar' && filled($this->category_ar)
+            ? $this->category_ar
+            : $this->category;
+    }
+
+    public function localizedShortDescription(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        return $locale === 'ar' && filled($this->short_description_ar)
+            ? $this->short_description_ar
+            : $this->short_description;
+    }
+
+    public function localizedFullDescription(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        return $locale === 'ar' && filled($this->full_description_ar)
+            ? $this->full_description_ar
+            : $this->full_description;
+    }
+
+    public function localizedFlavorProfile(?string $locale = null): array
+    {
+        $locale ??= app()->getLocale();
+
+        $arValue = $this->flavor_profile_ar;
+
+        return $locale === 'ar' && filled($arValue)
+            ? $arValue
+            : ($this->flavor_profile ?? []);
+    }
+
+    public function localizedAllergens(?string $locale = null): array
+    {
+        $locale ??= app()->getLocale();
+
+        $arValue = $this->allergens_ar;
+
+        return $locale === 'ar' && filled($arValue)
+            ? $arValue
+            : ($this->allergens ?? []);
+    }
 }
