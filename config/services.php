@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'google_maps' => [
+        'review_url' => env('GOOGLE_MAPS_REVIEW_URL'),
+    ],
+
 ];

@@ -36,8 +36,21 @@
         </div>
     </div>
 
-    <a href="{{ route('storefront.index') }}" class="inline-block px-8 py-3 rounded-md font-semibold transition-opacity hover:opacity-90" style="background-color: var(--color-accent-dark); color: var(--color-bg);">
-        {{ $locale === 'ar' ? 'العودة للصفحة الرئيسية' : 'Return to Home' }}
-    </a>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a
+            href="{{ route('feedback.create', $order) }}"
+            class="inline-block rounded-md px-8 py-3 font-semibold transition-opacity hover:opacity-90"
+            style="background-color: var(--color-accent-dark); color: var(--color-bg);"
+        >
+            {{ $locale === 'ar' ? 'شاركنا رأيك' : 'Leave Feedback' }}
+        </a>
+        <a
+            href="{{ route('storefront.index') }}"
+            class="inline-block rounded-md px-8 py-3 font-semibold border transition-opacity hover:opacity-90"
+            style="border-color: var(--color-border); color: var(--color-text);"
+        >
+            {{ $locale === 'ar' ? 'العودة للصفحة الرئيسية' : 'Return to Home' }}
+        </a>
+    </div>
 </div>
 @endsection

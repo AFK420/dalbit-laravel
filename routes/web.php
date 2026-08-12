@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -22,6 +23,14 @@ Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+
+// Feedback routes
+Route::get('/feedback/{order}', [FeedbackController::class, 'create'])
+    ->name('feedback.create');
+Route::post('/feedback/{order}', [FeedbackController::class, 'store'])
+    ->name('feedback.store');
+Route::get('/feedback/thanks', [FeedbackController::class, 'thanks'])
+    ->name('feedback.thanks');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
