@@ -43,10 +43,14 @@
 
                 <div class="space-y-4">
                     @foreach (($orders[$status->value] ?? collect()) as $order)
-                        <article class="rounded-md border p-4" style="border-color: var(--color-border);">
-                            <p class="font-semibold" style="color: var(--color-text);">
+                        <article class="rounded-md border p-4 transition-colors hover:border-amber-400" style="border-color: var(--color-border);">
+                            <a
+                                href="{{ route('admin.orders.show', $order) }}"
+                                class="font-semibold hover:underline block mb-1 text-base"
+                                style="color: var(--color-accent-dark);"
+                            >
                                 {{ $order->customer_name }}
-                            </p>
+                            </a>
 
                             <p class="text-sm" style="color: var(--color-text);">
                                 {{ $order->phone }}

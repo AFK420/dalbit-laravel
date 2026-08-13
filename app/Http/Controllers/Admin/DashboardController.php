@@ -29,6 +29,17 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function show(Order $order): View
+    {
+        $order->load(['handledByAdmin', 'customerFeedback']);
+
+        return view('admin.orders.show', [
+            'order' => $order,
+            'statuses' => OrderStatus::cases(),
+            'admin' => Auth::guard('admin')->user(),
+        ]);
+    }
+
     public function updateStatus(
         Request $request,
         Order $order

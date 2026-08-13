@@ -53,6 +53,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
+        Route::get('/orders/{order}', [AdminDashboardController::class, 'show'])
+            ->name('orders.show');
+
         Route::patch('/orders/{order}/status', [
             AdminDashboardController::class,
             'updateStatus',
